@@ -1,6 +1,7 @@
 package com.expensetracker.service;
 
 import com.expensetracker.domain.Category;
+import com.expensetracker.domain.PaymentMethod;
 import com.expensetracker.domain.Transaction;
 import com.expensetracker.domain.TxnType;
 import com.expensetracker.dto.TransactionDtos.PageResponse;
@@ -30,7 +31,7 @@ public class TransactionService {
         this.categoryService = categoryService;
     }
 
-    public record Filter(LocalDate from, LocalDate to, TxnType type, Long categoryId, String q) {
+    public record Filter(LocalDate from, LocalDate to, TxnType type, Long categoryId, PaymentMethod paymentMethod, String q) {
     }
 
     @Transactional(readOnly = true)
@@ -42,6 +43,7 @@ public class TransactionService {
             if (f.to() != null) p.add(cb.lessThanOrEqualTo(root.get("txnDate"), f.to()));
             if (f.type() != null) p.add(cb.equal(root.get("type"), f.type()));
             if (f.categoryId() != null) p.add(cb.equal(root.get("category").get("id"), f.categoryId()));
+            if (f.paymentMethod() != null) p.add(cb.equal(root.get("paymentMethod"), f.paymentMethod()));
             if (f.q() != null && !f.q().isBlank()) {
                 p.add(cb.like(cb.lower(root.get("note")), "%" + f.q().trim().toLowerCase(Locale.ROOT) + "%"));
             }
@@ -55,7 +57,8 @@ public class TransactionService {
     @Transactional
     public TransactionResponse create(Long userId, TransactionRequest req) {
         Category category = categoryService.getUsable(userId, req.categoryId());
-        Transaction t = new Transaction(userId, category, req.amount(), req.date(), trim(req.note()), null);
+        Transaction t = new Transaction(userId, category, req.amount(), req.date(), trim(req.note()),
+                req.paymentMethod(), null);
         return TransactionResponse.of(transactions.save(t));
     }
 
@@ -68,6 +71,7 @@ public class TransactionService {
         t.setAmount(req.amount());
         t.setTxnDate(req.date());
         t.setNote(trim(req.note()));
+        t.setPaymentMethod(req.paymentMethod());
         return TransactionResponse.of(transactions.saveAndFlush(t));
     }
 

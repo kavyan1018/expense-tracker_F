@@ -1,5 +1,6 @@
 package com.expensetracker.web;
 
+import com.expensetracker.domain.PaymentMethod;
 import com.expensetracker.domain.TxnType;
 import com.expensetracker.dto.TransactionDtos.PageResponse;
 import com.expensetracker.dto.TransactionDtos.TransactionRequest;
@@ -29,11 +30,12 @@ public class TransactionController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @RequestParam(required = false) TxnType type,
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) PaymentMethod paymentMethod,
             @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return transactions.list(CurrentUser.id(),
-                new TransactionService.Filter(from, to, type, categoryId, q), page, size);
+                new TransactionService.Filter(from, to, type, categoryId, paymentMethod, q), page, size);
     }
 
     @PostMapping

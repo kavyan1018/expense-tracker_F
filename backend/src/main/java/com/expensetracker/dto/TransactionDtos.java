@@ -1,5 +1,6 @@
 package com.expensetracker.dto;
 
+import com.expensetracker.domain.PaymentMethod;
 import com.expensetracker.domain.Transaction;
 import com.expensetracker.domain.TxnType;
 import jakarta.validation.constraints.DecimalMax;
@@ -26,16 +27,17 @@ public final class TransactionDtos {
             @DecimalMax(value = "9999999999.99", message = "Amount is too large")
             @Digits(integer = 10, fraction = 2, message = "Use at most 2 decimal places") BigDecimal amount,
             @NotNull(message = "Date is required") LocalDate date,
-            @Size(max = 255) String note) {
+            @Size(max = 255) String note,
+            PaymentMethod paymentMethod) {
     }
 
     public record TransactionResponse(Long id, TxnType type, BigDecimal amount, LocalDate date, String note,
                                       Long categoryId, String categoryName, String categoryColor,
-                                      boolean recurring) {
+                                      PaymentMethod paymentMethod, boolean recurring) {
         public static TransactionResponse of(Transaction t) {
             return new TransactionResponse(t.getId(), t.getType(), t.getAmount(), t.getTxnDate(), t.getNote(),
                     t.getCategory().getId(), t.getCategory().getName(), t.getCategory().getColor(),
-                    t.getRecurringId() != null);
+                    t.getPaymentMethod(), t.getRecurringId() != null);
         }
     }
 

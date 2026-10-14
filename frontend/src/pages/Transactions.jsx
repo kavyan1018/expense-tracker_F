@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { categoryApi, errorInfo, transactionApi } from '../api/client.js';
 import TransactionForm from '../components/TransactionForm.jsx';
 import { Alert, CategoryDot, CategorySelect, Empty, Modal, PageHeader } from '../components/ui.jsx';
-import { currentMonth, dateLabel, money, monthRange } from '../utils/format.js';
+import { PAYMENT_ICON, PAYMENT_LABEL, currentMonth, dateLabel, money, monthRange } from '../utils/format.js';
 
 const PAGE_SIZE = 20;
 
 export default function Transactions() {
-  const [filters, setFilters] = useState({ ...monthRange(currentMonth()), type: '', categoryId: null, q: '' });
+  const [filters, setFilters] = useState({ ...monthRange(currentMonth()), type: '', categoryId: null, paymentMethod: '', q: '' });
   const [page, setPage] = useState(0);
   const [result, setResult] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -79,6 +79,13 @@ export default function Transactions() {
           <CategorySelect categories={categories} type={filters.type || undefined} value={filters.categoryId}
                           onChange={setFilter('categoryId')} allowEmpty />
         </label>
+        <label className="field compact">
+          <span className="field-label">Payment method</span>
+          <select value={filters.paymentMethod} onChange={(e) => setFilter('paymentMethod')(e.target.value)}>
+            <option value="">All</option>
+            {Object.entries(PAYMENT_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+          </select>
+        </label>
         <label className="field compact grow">
           <span className="field-label">Search notes</span>
           <input type="search" placeholder="e.g. electricity" value={filters.q} onChange={(e) => setFilter('q')(e.target.value)} />
@@ -96,6 +103,7 @@ export default function Transactions() {
               <tr>
                 <th>Date</th>
                 <th>Category</th>
+                <th>Paid by</th>
                 <th>Note</th>
                 <th className="right">Amount</th>
                 <th aria-label="Actions" />
@@ -106,6 +114,9 @@ export default function Transactions() {
                 <tr key={t.id}>
                   <td className="nowrap">{dateLabel(t.date)}</td>
                   <td className="nowrap"><CategoryDot color={t.categoryColor} /> {t.categoryName}</td>
+                  <td className="nowrap">
+                    {t.paymentMethod ? `${PAYMENT_ICON[t.paymentMethod]} ${PAYMENT_LABEL[t.paymentMethod]}` : <span className="muted">—</span>}
+                  </td>
                   <td>
                     {t.note || <span className="muted">—</span>}
                     {t.recurring && <span className="badge">Recurring</span>}

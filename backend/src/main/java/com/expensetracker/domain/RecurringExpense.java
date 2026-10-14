@@ -36,6 +36,10 @@ public class RecurringExpense {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
     @Column(name = "next_run_date", nullable = false)
     private LocalDate nextRunDate;
 
@@ -58,6 +62,7 @@ public class RecurringExpense {
     public LocalDate getStartDate() { return startDate; }
     public LocalDate getEndDate() { return endDate; }
     public LocalDate getNextRunDate() { return nextRunDate; }
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public boolean isActive() { return active; }
 
     public void setCategory(Category category) { this.category = category; }
@@ -67,5 +72,6 @@ public class RecurringExpense {
     public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
     public void setNextRunDate(LocalDate nextRunDate) { this.nextRunDate = nextRunDate; }
+    public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
     public void setActive(boolean active) { this.active = active; }
 }

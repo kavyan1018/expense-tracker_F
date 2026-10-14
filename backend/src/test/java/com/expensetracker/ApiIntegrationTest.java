@@ -116,6 +116,30 @@ class ApiIntegrationTest {
     }
 
     @Test
+    void transactionsRecordHowTheyWerePaid() throws Exception {
+        long food = categoryId(asha, "🍔 Food & Dining");
+        send(post("/api/transactions"), asha, "{\"categoryId\":" + food + ",\"amount\":120,\"date\":\"2026-10-10\",\"paymentMethod\":\"UPI\"}")
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.paymentMethod").value("UPI"));
+        long cash = read(send(post("/api/transactions"), asha, "{\"categoryId\":" + food + ",\"amount\":40,\"date\":\"2026-10-11\",\"paymentMethod\":\"CASH\"}")
+                .andExpect(status().isCreated())).get("id").asLong();
+        send(post("/api/transactions"), asha, "{\"categoryId\":" + food + ",\"amount\":40,\"paymentMethod\":\"CHEQUE\"}")
+                .andExpect(status().isBadRequest());
+
+        send(get("/api/transactions?paymentMethod=CASH"), asha, null)
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].id").value(cash));
+        send(put("/api/transactions/" + cash), asha, "{\"categoryId\":" + food + ",\"amount\":40,\"date\":\"2026-10-11\",\"paymentMethod\":\"CARD\"}")
+                .andExpect(jsonPath("$.paymentMethod").value("CARD"));
+
+        // a recurring rule passes its payment method on to what it posts
+        long rent = categoryId(asha, "🏠 Rent & Housing");
+        send(post("/api/recurring"), asha, "{\"categoryId\":" + rent + ",\"amount\":9000,\"description\":\"Rent\",\"frequency\":\"MONTHLY\",\"startDate\":\"2026-10-01\",\"paymentMethod\":\"BANK_TRANSFER\"}")
+                .andExpect(status().isCreated()).andExpect(jsonPath("$.paymentMethod").value("BANK_TRANSFER"));
+        send(get("/api/transactions?paymentMethod=BANK_TRANSFER"), asha, null)
+                .andExpect(jsonPath("$.content[0].note").value("Rent"));
+    }
+
+    @Test
     void newCategoryCanBeAddedFromTheOtherOption() throws Exception {
         send(post("/api/categories"), asha, "{\"name\":\"🐶 Pet Care\",\"type\":\"EXPENSE\",\"color\":\"#0d9488\"}")
                 .andExpect(status().isCreated());

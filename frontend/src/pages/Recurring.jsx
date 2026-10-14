@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { categoryApi, errorInfo, recurringApi } from '../api/client.js';
 import CategoryPicker from '../components/CategoryPicker.jsx';
-import { Alert, Empty, Field, Modal, PageHeader } from '../components/ui.jsx';
+import { Alert, Empty, Field, Modal, PageHeader, PaymentMethodPicker } from '../components/ui.jsx';
 import { FREQUENCY_LABEL, dateLabel, money, today } from '../utils/format.js';
 
 function RecurringForm({ categories, initial, onSaved, onCancel }) {
@@ -13,6 +13,7 @@ function RecurringForm({ categories, initial, onSaved, onCancel }) {
     frequency: initial?.frequency ?? 'MONTHLY',
     startDate: initial?.startDate ?? today(),
     endDate: initial?.endDate ?? '',
+    paymentMethod: editing ? initial.paymentMethod : 'BANK_TRANSFER',
   });
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
@@ -53,6 +54,12 @@ function RecurringForm({ categories, initial, onSaved, onCancel }) {
         <CategoryPicker categories={categories.filter((c) => !c.archived || c.id === initial?.categoryId)}
                         value={form.categoryId} onChange={set('categoryId')} required />
       </Field>
+      {/* a div, not Field's <label>: clicking the label text would press the first button */}
+      <div className="field">
+        <span className="field-label">Payment method</span>
+        <PaymentMethodPicker value={form.paymentMethod} onChange={set('paymentMethod')} />
+        {errors.paymentMethod && <span className="field-error">{errors.paymentMethod}</span>}
+      </div>
       <div className="form-row">
         <Field label="First date" error={errors.startDate}>
           <input type="date" value={form.startDate} onChange={(e) => set('startDate')(e.target.value)} required />

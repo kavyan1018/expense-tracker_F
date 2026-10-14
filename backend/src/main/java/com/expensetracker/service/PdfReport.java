@@ -46,7 +46,7 @@ final class PdfReport {
         PdfWriter.getInstance(doc, out);
         doc.open();
 
-        doc.add(new Paragraph("Expense report", title));
+        doc.add(new Paragraph("Daily Expenses Track: expense report", title));
         doc.add(new Paragraph(name + "  |  " + DATE.format(summary.from()) + " to " + DATE.format(summary.to()), muted));
         doc.add(spacer());
 
@@ -80,15 +80,16 @@ final class PdfReport {
 
         doc.add(new Paragraph("Transactions (" + rows.size() + ")", h2));
         doc.add(spacer());
-        PdfPTable txns = new PdfPTable(new float[]{2.2f, 1.6f, 2.6f, 5f, 2.4f});
+        PdfPTable txns = new PdfPTable(new float[]{2.2f, 1.6f, 2.8f, 2f, 4.4f, 2.4f});
         txns.setWidthPercentage(100);
         txns.setHeaderRows(1);
-        header(txns, bold, "Date", "Type", "Category", "Note", "Amount");
+        header(txns, bold, "Date", "Type", "Category", "Paid by", "Note", "Amount");
         for (Transaction t : rows) {
             boolean income = t.getType() == TxnType.INCOME;
             txns.addCell(text(DATE.format(t.getTxnDate()), body));
             txns.addCell(text(income ? "Income" : "Expense", body));
             txns.addCell(text(t.getCategory().getName(), body));
+            txns.addCell(text(t.getPaymentMethod() == null ? "" : t.getPaymentMethod().label(), body));
             txns.addCell(text(t.getNote() == null ? "" : t.getNote(), body));
             Font amountFont = FontFactory.getFont(FontFactory.HELVETICA, 9, income ? INCOME : Color.BLACK);
             txns.addCell(right((income ? "+" : "-") + money(t.getAmount()), amountFont));

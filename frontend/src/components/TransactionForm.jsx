@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { errorInfo, transactionApi } from '../api/client.js';
 import { today } from '../utils/format.js';
 import CategoryPicker from './CategoryPicker.jsx';
-import { Alert, Field } from './ui.jsx';
+import { Alert, Field, PaymentMethodPicker } from './ui.jsx';
 
 /** Add or edit a transaction. Type follows the chosen category. */
 export default function TransactionForm({ categories, initial, onSaved, onCancel }) {
@@ -13,6 +13,7 @@ export default function TransactionForm({ categories, initial, onSaved, onCancel
     amount: initial?.amount ?? '',
     date: initial?.date ?? today(),
     note: initial?.note ?? '',
+    paymentMethod: editing ? initial.paymentMethod : 'CASH',
   });
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
@@ -66,6 +67,12 @@ export default function TransactionForm({ categories, initial, onSaved, onCancel
       <Field label="Category" error={errors.categoryId}>
         <CategoryPicker categories={usable} type={type} value={form.categoryId} onChange={set('categoryId')} required />
       </Field>
+      {/* a div, not Field's <label>: clicking the label text would press the first button */}
+      <div className="field">
+        <span className="field-label">Payment method</span>
+        <PaymentMethodPicker value={form.paymentMethod} onChange={set('paymentMethod')} />
+        {errors.paymentMethod && <span className="field-error">{errors.paymentMethod}</span>}
+      </div>
       <Field label="Note" error={errors.note} hint="Optional, e.g. shop name or what it was for">
         <input type="text" maxLength={255} value={form.note || ''} onChange={(e) => set('note')(e.target.value)} />
       </Field>

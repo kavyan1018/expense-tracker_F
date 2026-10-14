@@ -120,7 +120,7 @@ public class RecurringService {
             }
             if (!transactions.existsByRecurringIdAndTxnDate(rule.getId(), date)) {
                 transactions.save(new Transaction(rule.getUserId(), rule.getCategory(), rule.getAmount(), date,
-                        rule.getDescription(), rule.getId()));
+                        rule.getDescription(), rule.getPaymentMethod(), rule.getId()));
                 posted++;
             }
             rule.setNextRunDate(rule.getFrequency().nextAfter(rule.getStartDate(), date));
@@ -143,6 +143,7 @@ public class RecurringService {
         rule.setFrequency(req.frequency());
         rule.setStartDate(req.startDate());
         rule.setEndDate(req.endDate());
+        rule.setPaymentMethod(req.paymentMethod());
     }
 
     private static LocalDate firstOnOrAfter(RecurringExpense rule, LocalDate date) {

@@ -39,7 +39,7 @@ export default function Layout() {
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="brand">
           <span className="brand-mark">₹</span>
-          <span>Family Expenses</span>
+          <span>Daily Expenses Track</span>
         </div>
         <nav onClick={() => setOpen(false)}>
           {NAV.map((n) => (
@@ -63,7 +63,7 @@ export default function Layout() {
       <div className="main">
         <header className="topbar">
           <button className="menu-btn" onClick={() => setOpen((o) => !o)} aria-label="Menu">☰</button>
-          <span className="topbar-title">Family Expenses</span>
+          <span className="topbar-title">Daily Expenses Track</span>
         </header>
         {open && <div className="scrim" onClick={() => setOpen(false)} />}
         <main className="content">

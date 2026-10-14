@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { monthLabel, shiftMonth } from '../utils/format.js';
+import { PAYMENT_ICON, PAYMENT_LABEL, monthLabel, shiftMonth } from '../utils/format.js';
 
 export function PageHeader({ title, subtitle, children }) {
   return (
@@ -109,5 +109,19 @@ export function CategorySelect({ categories, value, onChange, onAddNew, type, al
       ))}
       {onAddNew && <option value={ADD_NEW}>➕ Other (add a new category)…</option>}
     </select>
+  );
+}
+
+/** Cash, UPI, Card or Bank Transfer, as a row of buttons. */
+export function PaymentMethodPicker({ value, onChange }) {
+  return (
+    <div className="segmented four" role="radiogroup" aria-label="Payment method">
+      {Object.entries(PAYMENT_LABEL).map(([k, label]) => (
+        <button type="button" key={k} role="radio" aria-checked={value === k} className={value === k ? 'active' : ''}
+                onClick={() => onChange(k)}>
+          {PAYMENT_ICON[k]} {label}
+        </button>
+      ))}
+    </div>
   );
 }

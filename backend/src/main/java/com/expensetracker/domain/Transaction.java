@@ -36,6 +36,10 @@ public class Transaction {
     @Column(length = 255)
     private String note;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
     @Column(name = "recurring_id", updatable = false)
     private Long recurringId;
 
@@ -51,8 +55,9 @@ public class Transaction {
     }
 
     public Transaction(Long userId, Category category, BigDecimal amount, LocalDate txnDate,
-                       String note, Long recurringId) {
+                       String note, PaymentMethod paymentMethod, Long recurringId) {
         this.userId = userId;
+        this.paymentMethod = paymentMethod;
         this.amount = amount;
         this.txnDate = txnDate;
         this.note = note;
@@ -73,9 +78,11 @@ public class Transaction {
     public BigDecimal getAmount() { return amount; }
     public LocalDate getTxnDate() { return txnDate; }
     public String getNote() { return note; }
+    public PaymentMethod getPaymentMethod() { return paymentMethod; }
     public Long getRecurringId() { return recurringId; }
 
     public void setAmount(BigDecimal amount) { this.amount = amount; }
     public void setTxnDate(LocalDate txnDate) { this.txnDate = txnDate; }
     public void setNote(String note) { this.note = note; }
+    public void setPaymentMethod(PaymentMethod paymentMethod) { this.paymentMethod = paymentMethod; }
 }

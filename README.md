@@ -1,4 +1,4 @@
-# Family Expense Tracker
+# Daily Expenses Track
 
 A web app where each family member keeps track of their own income, expenses, budgets and recurring bills. Every account is private: nobody can see or change another member's records.
 
@@ -13,7 +13,8 @@ A web app where each family member keeps track of their own income, expenses, bu
 
 - Separate, private account for each family member, with default categories created on sign-up
 - Manual income and expense entry, with filters and search
-- Your own categories, each with a color. A category that is still in use gets archived instead of deleted
+- Payment method on every entry (Cash, UPI, Card or Bank Transfer), with a filter and a "Paid by" column in exports
+- 16 ready-made expense categories (Food & Dining, Tea & Coffee, EMIs & Loans and more), plus your own: pick "Other" in the category list when adding an entry to add one. Each has a color, and a category that is still in use gets archived instead of deleted
 - Monthly budgets, either overall or per category, with progress bars and a "copy last month" button
 - Recurring bills and income (weekly, monthly or yearly), added automatically on their date
 - Dashboard and reports: totals, a spending-by-category chart, and 6- and 12-month trends

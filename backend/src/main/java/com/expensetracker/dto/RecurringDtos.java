@@ -1,6 +1,7 @@
 package com.expensetracker.dto;
 
 import com.expensetracker.domain.Frequency;
+import com.expensetracker.domain.PaymentMethod;
 import com.expensetracker.domain.RecurringExpense;
 import com.expensetracker.domain.TxnType;
 import jakarta.validation.constraints.DecimalMin;
@@ -25,17 +26,19 @@ public final class RecurringDtos {
             @NotBlank(message = "Description is required") @Size(max = 255) String description,
             @NotNull(message = "Frequency is required") Frequency frequency,
             @NotNull(message = "Start date is required") LocalDate startDate,
-            LocalDate endDate) {
+            LocalDate endDate,
+            PaymentMethod paymentMethod) {
     }
 
     public record RecurringResponse(Long id, Long categoryId, String categoryName, TxnType type,
                                     BigDecimal amount, String description, Frequency frequency,
                                     LocalDate startDate, LocalDate endDate, LocalDate nextRunDate,
-                                    boolean active) {
+                                    PaymentMethod paymentMethod, boolean active) {
         public static RecurringResponse of(RecurringExpense r) {
             return new RecurringResponse(r.getId(), r.getCategory().getId(), r.getCategory().getName(),
                     r.getCategory().getType(), r.getAmount(), r.getDescription(), r.getFrequency(),
-                    r.getStartDate(), r.getEndDate(), r.getNextRunDate(), r.isActive());
+                    r.getStartDate(), r.getEndDate(), r.getNextRunDate(),
+                    r.getPaymentMethod(), r.isActive());
         }
     }
 }

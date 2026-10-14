@@ -44,3 +44,5 @@ export function dateLabel(iso) {
 }
 
 export const FREQUENCY_LABEL = { WEEKLY: 'Weekly', MONTHLY: 'Monthly', YEARLY: 'Yearly' };
+export const PAYMENT_LABEL = { CASH: 'Cash', UPI: 'UPI', CARD: 'Card', BANK_TRANSFER: 'Bank Transfer' };
+export const PAYMENT_ICON = { CASH: '💵', UPI: '📲', CARD: '💳', BANK_TRANSFER: '🏦' };

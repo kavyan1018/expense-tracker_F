@@ -135,6 +135,7 @@ input, select { font: inherit; color: inherit; }
 .check { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--muted); }
 .filters { display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: flex-end; padding: 1rem 1.25rem; }
 .segmented { display: grid; grid-template-columns: 1fr 1fr; background: var(--surface-2); border-radius: 9px; padding: 4px; }
+.segmented.four { grid-template-columns: repeat(4, 1fr); }
 .segmented button { border: 0; background: transparent; padding: 0.5rem; border-radius: 7px; font-weight: 600; color: var(--muted); }
 .segmented button.active { background: var(--surface); box-shadow: var(--shadow); }
 .segmented button.active.expense { color: var(--expense); }

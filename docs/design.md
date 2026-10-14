@@ -1,4 +1,4 @@
-# Family Expense Tracker: design
+# Daily Expenses Track: design
 
 Stack: React frontend, Spring Boot REST backend with Spring Security, MySQL 8. Runs locally.
 Schema: [V1__init.sql](../backend/src/main/resources/db/migration/V1__init.sql), applied automatically by Flyway on startup.
@@ -19,9 +19,9 @@ Each family member has a fully private account. There is no shared view and no a
 |---|---|---|
 | `users` | Login and profile | email unique (stored lowercase), BCrypt hash, currency INR |
 | `categories` | Income and expense categories per user | unique name per user and type; archived instead of deleted when in use |
-| `transactions` | Manual income and expense entries | amount > 0, DECIMAL(12,2); `recurring_id` set when posted by a rule |
+| `transactions` | Manual income and expense entries | amount > 0, DECIMAL(12,2); `payment_method` CASH, UPI, CARD or BANK_TRANSFER (NULL for entries made before V3); `recurring_id` set when posted by a rule |
 | `budgets` | Monthly limit, overall or per category | `period_month` = 1st of month; `category_id` NULL = overall |
-| `recurring_expenses` | Weekly, monthly or yearly rules (expense or income, following the category) | `next_run_date` tracks the next occurrence to post |
+| `recurring_expenses` | Weekly, monthly or yearly rules (expense or income, following the category) | `next_run_date` tracks the next occurrence to post; `payment_method` is copied to each posted transaction |
 
 New users get default categories on registration. Expense: 🍔 Food & Dining, 🛒 Groceries, 🚗 Transportation, 🏠 Rent & Housing, 💡 Utilities & Bills, 📱 Mobile & Recharge, 🛍️ Shopping, ☕ Tea & Coffee, 🏥 Healthcare, 🎬 Entertainment, 🎓 Education, 💳 EMIs & Loans, 👨‍👩‍👧 Family & Personal, ✈️ Travel, 💰 Savings & Investments, 📦 Miscellaneous. Income: Salary, Business, Gifts, Other. Migration V2 gives existing users the same list (old defaults are renamed in place, so their records keep their category). The category dropdown ends with "Other", which asks for a new category name, adds it to the user's list and selects it. The PDF export drops emoji because its built-in fonts have none.
 

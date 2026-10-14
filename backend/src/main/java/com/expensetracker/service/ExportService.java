@@ -56,7 +56,7 @@ public class ExportService {
 
             Sheet summary = wb.createSheet("Summary");
             int r = 0;
-            cell(summary.createRow(r++), 0, "Expense report for " + d.name, title);
+            cell(summary.createRow(r++), 0, "Daily Expenses Track: expense report for " + d.name, title);
             cell(summary.createRow(r++), 0, "Period: " + DATE.format(from) + " to " + DATE.format(to), null);
             r++;
             r = moneyRow(summary, r, "Total income", d.summary.income(), bold, money);
@@ -81,7 +81,7 @@ public class ExportService {
 
             Sheet sheet = wb.createSheet("Transactions");
             Row header = sheet.createRow(0);
-            String[] cols = {"Date", "Type", "Category", "Note", "Amount"};
+            String[] cols = {"Date", "Type", "Category", "Paid by", "Note", "Amount"};
             for (int i = 0; i < cols.length; i++) {
                 cell(header, i, cols[i], bold);
             }
@@ -93,8 +93,9 @@ public class ExportService {
                 dc.setCellStyle(date);
                 cell(row, 1, t.getType() == TxnType.INCOME ? "Income" : "Expense", null);
                 cell(row, 2, t.getCategory().getName(), null);
-                cell(row, 3, t.getNote() == null ? "" : t.getNote(), null);
-                Cell amount = row.createCell(4);
+                cell(row, 3, t.getPaymentMethod() == null ? "" : t.getPaymentMethod().label(), null);
+                cell(row, 4, t.getNote() == null ? "" : t.getNote(), null);
+                Cell amount = row.createCell(5);
                 amount.setCellValue(t.getAmount().doubleValue());
                 amount.setCellStyle(money);
             }
@@ -102,7 +103,7 @@ public class ExportService {
             if (i > 1) {
                 sheet.setAutoFilter(new CellRangeAddress(0, i - 1, 0, cols.length - 1));
             }
-            int[] widths = {14, 10, 18, 40, 16};
+            int[] widths = {14, 10, 22, 14, 40, 16};
             for (int c = 0; c < widths.length; c++) {
                 sheet.setColumnWidth(c, widths[c] * 256);
             }
