@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { errorInfo, transactionApi } from '../api/client.js';
 import { today } from '../utils/format.js';
-import { Alert, CategorySelect, Field } from './ui.jsx';
+import CategoryPicker from './CategoryPicker.jsx';
+import { Alert, Field } from './ui.jsx';
 
 /** Add or edit a transaction. Type follows the chosen category. */
 export default function TransactionForm({ categories, initial, onSaved, onCancel }) {
@@ -63,7 +64,7 @@ export default function TransactionForm({ categories, initial, onSaved, onCancel
         </Field>
       </div>
       <Field label="Category" error={errors.categoryId}>
-        <CategorySelect categories={usable} type={type} value={form.categoryId} onChange={set('categoryId')} required />
+        <CategoryPicker categories={usable} type={type} value={form.categoryId} onChange={set('categoryId')} required />
       </Field>
       <Field label="Note" error={errors.note} hint="Optional, e.g. shop name or what it was for">
         <input type="text" maxLength={255} value={form.note || ''} onChange={(e) => set('note')(e.target.value)} />

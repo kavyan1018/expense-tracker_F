@@ -15,21 +15,31 @@ import com.expensetracker.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class CategoryService {
 
+    // Keep in step with db/migration/V2__more_default_categories.sql, which adds these for existing users.
     private static final List<Category> DEFAULTS = List.of(
-            new Category(null, "Groceries", TxnType.EXPENSE, "#16a34a"),
-            new Category(null, "Rent", TxnType.EXPENSE, "#7c3aed"),
-            new Category(null, "Utilities", TxnType.EXPENSE, "#0891b2"),
-            new Category(null, "Transport", TxnType.EXPENSE, "#ea580c"),
-            new Category(null, "Health", TxnType.EXPENSE, "#dc2626"),
-            new Category(null, "Education", TxnType.EXPENSE, "#2563eb"),
-            new Category(null, "Entertainment", TxnType.EXPENSE, "#db2777"),
-            new Category(null, "Shopping", TxnType.EXPENSE, "#ca8a04"),
-            new Category(null, "Other", TxnType.EXPENSE, "#64748b"),
+            new Category(null, "🍔 Food & Dining", TxnType.EXPENSE, "#f97316"),
+            new Category(null, "🛒 Groceries", TxnType.EXPENSE, "#16a34a"),
+            new Category(null, "🚗 Transportation", TxnType.EXPENSE, "#ea580c"),
+            new Category(null, "🏠 Rent & Housing", TxnType.EXPENSE, "#7c3aed"),
+            new Category(null, "💡 Utilities & Bills", TxnType.EXPENSE, "#0891b2"),
+            new Category(null, "📱 Mobile & Recharge", TxnType.EXPENSE, "#0284c7"),
+            new Category(null, "🛍️ Shopping", TxnType.EXPENSE, "#ca8a04"),
+            new Category(null, "☕ Tea & Coffee", TxnType.EXPENSE, "#92400e"),
+            new Category(null, "🏥 Healthcare", TxnType.EXPENSE, "#dc2626"),
+            new Category(null, "🎬 Entertainment", TxnType.EXPENSE, "#db2777"),
+            new Category(null, "🎓 Education", TxnType.EXPENSE, "#2563eb"),
+            new Category(null, "💳 EMIs & Loans", TxnType.EXPENSE, "#be123c"),
+            new Category(null, "👨‍👩‍👧 Family & Personal", TxnType.EXPENSE, "#c026d3"),
+            new Category(null, "✈️ Travel", TxnType.EXPENSE, "#0d9488"),
+            new Category(null, "💰 Savings & Investments", TxnType.EXPENSE, "#65a30d"),
+            new Category(null, "📦 Miscellaneous", TxnType.EXPENSE, "#64748b"),
             new Category(null, "Salary", TxnType.INCOME, "#059669"),
             new Category(null, "Business", TxnType.INCOME, "#0d9488"),
             new Category(null, "Gifts", TxnType.INCOME, "#9333ea"),
@@ -60,6 +70,7 @@ public class CategoryService {
         return categories.findByUserIdOrderByTypeAscNameAsc(userId).stream()
                 .filter(c -> type == null || c.getType() == type)
                 .filter(c -> includeArchived || !c.isArchived())
+                .sorted(Comparator.comparing((Category c) -> c.getType().name()).thenComparing(c -> sortKey(c.getName())))
                 .map(CategoryResponse::of)
                 .toList();
     }
@@ -117,5 +128,11 @@ public class CategoryService {
             throw new BadRequestException("This category is archived");
         }
         return c;
+    }
+
+    /** Sorts by the words, so a leading emoji such as "🛒 " doesn't decide the order; catch-alls go last. */
+    static String sortKey(String name) {
+        String key = name.replaceFirst("^[^\\p{L}\\p{N}]+", "").toLowerCase(Locale.ROOT);
+        return key.equals("other") || key.equals("miscellaneous") ? "￿" + key : key;
     }
 }

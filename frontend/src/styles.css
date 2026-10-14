@@ -129,6 +129,8 @@ input, select { font: inherit; color: inherit; }
 .field.has-error input, .field.has-error select { border-color: var(--expense); }
 .field-error { color: var(--expense); font-size: 0.8rem; }
 .field-hint { color: var(--muted); font-size: 0.8rem; }
+.new-category { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.7rem; border: 1px dashed var(--border); border-radius: 9px; }
+.new-category-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
 .field.compact { min-width: 140px; }
 .check { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--muted); }
 .filters { display: flex; flex-wrap: wrap; gap: 0.9rem; align-items: flex-end; padding: 1rem 1.25rem; }

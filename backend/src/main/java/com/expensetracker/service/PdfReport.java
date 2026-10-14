@@ -122,9 +122,14 @@ final class PdfReport {
     }
 
     private static PdfPCell text(String value, Font font) {
-        PdfPCell c = new PdfPCell(new Phrase(value, font));
+        PdfPCell c = new PdfPCell(new Phrase(plain(value), font));
         c.setPadding(4);
         return c;
+    }
+
+    /** The built-in PDF fonts have no emoji, so drop them (e.g. "🛒 Groceries" prints as "Groceries"). */
+    static String plain(String value) {
+        return value.replaceAll("[\\p{So}\\p{Cs}\\x{FE0F}\\x{200D}]", "").trim();
     }
 
     private static PdfPCell right(String value, Font font) {

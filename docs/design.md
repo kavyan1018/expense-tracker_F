@@ -23,7 +23,7 @@ Each family member has a fully private account. There is no shared view and no a
 | `budgets` | Monthly limit, overall or per category | `period_month` = 1st of month; `category_id` NULL = overall |
 | `recurring_expenses` | Weekly, monthly or yearly rules (expense or income, following the category) | `next_run_date` tracks the next occurrence to post |
 
-New users get default categories on registration. Expense: Groceries, Rent, Utilities, Transport, Health, Education, Entertainment, Shopping, Other. Income: Salary, Business, Gifts, Other.
+New users get default categories on registration. Expense: 🍔 Food & Dining, 🛒 Groceries, 🚗 Transportation, 🏠 Rent & Housing, 💡 Utilities & Bills, 📱 Mobile & Recharge, 🛍️ Shopping, ☕ Tea & Coffee, 🏥 Healthcare, 🎬 Entertainment, 🎓 Education, 💳 EMIs & Loans, 👨‍👩‍👧 Family & Personal, ✈️ Travel, 💰 Savings & Investments, 📦 Miscellaneous. Income: Salary, Business, Gifts, Other. Migration V2 gives existing users the same list (old defaults are renamed in place, so their records keep their category). The category dropdown ends with "Other", which asks for a new category name, adds it to the user's list and selects it. The PDF export drops emoji because its built-in fonts have none.
 
 **Recurring expenses:** a scheduled job runs daily at 00:05 and once at app startup. It posts a transaction for every active rule whose `next_run_date` is today or earlier, then advances the date. Dates are always counted from the start date, so a rule starting on the 31st posts on 30 Sep and then returns to 31 Oct. The unique `(recurring_id, txn_date)` constraint stops duplicates if the job runs twice.
 - Creating a rule with a past start date posts the missed occurrences right away.

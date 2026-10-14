@@ -10,7 +10,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -18,6 +21,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -82,14 +86,48 @@ class ApiIntegrationTest {
     @Test
     void newUsersGetDefaultCategories() throws Exception {
         JsonNode cats = read(send(get("/api/categories"), asha, null));
-        assertThat(cats.size()).isEqualTo(13);
+        assertThat(cats.size()).isEqualTo(20);
+        // sorted by words, not by emoji, with the catch-all last
+        assertThat(cats.get(0).get("name").asText()).isEqualTo("🎓 Education");
+        assertThat(cats.get(15).get("name").asText()).isEqualTo("📦 Miscellaneous");
+        assertThat(cats.get(16).get("type").asText()).isEqualTo("INCOME");
+    }
+
+    @Test
+    void migrationUpgradesOldDefaultCategories() throws Exception {
+        jdbc.update("insert into users (email, password_hash, display_name) values ('old@example.com', 'x', 'Old')");
+        Long oldId = jdbc.queryForObject("select id from users where email = 'old@example.com'", Long.class);
+        jdbc.update("insert into categories (user_id, name, type) values (?, 'Groceries', 'EXPENSE'), (?, 'Other', 'EXPENSE'), (?, 'Other', 'INCOME')",
+                oldId, oldId, oldId);
+        Long groceries = jdbc.queryForObject("select id from categories where user_id = ? and name = 'Groceries'", Long.class, oldId);
+
+        try (var conn = jdbc.getDataSource().getConnection()) {
+            ScriptUtils.executeSqlScript(conn, new EncodedResource(
+                    new ClassPathResource("db/migration/V2__more_default_categories.sql"), StandardCharsets.UTF_8));
+        }
+
+        var names = jdbc.queryForList("select name from categories where user_id = ? and type = 'EXPENSE'", String.class, oldId);
+        assertThat(names).hasSize(16).contains("🛒 Groceries", "📦 Miscellaneous", "☕ Tea & Coffee")
+                .doesNotContain("Groceries", "Other");
+        // renamed in place, so existing records keep their category
+        assertThat(jdbc.queryForObject("select name from categories where id = ?", String.class, groceries)).isEqualTo("🛒 Groceries");
+        assertThat(jdbc.queryForObject("select count(*) from categories where user_id = ? and type = 'INCOME' and name = 'Other'",
+                Integer.class, oldId)).isEqualTo(1);
+    }
+
+    @Test
+    void newCategoryCanBeAddedFromTheOtherOption() throws Exception {
+        send(post("/api/categories"), asha, "{\"name\":\"🐶 Pet Care\",\"type\":\"EXPENSE\",\"color\":\"#0d9488\"}")
+                .andExpect(status().isCreated());
+        long pets = categoryId(asha, "🐶 Pet Care");
+        createTxn(asha, pets, "300.00", "2026-10-04");
     }
 
     // ---- privacy ----
 
     @Test
     void usersCannotSeeOrChangeEachOthersRecords() throws Exception {
-        long groceries = categoryId(asha, "Groceries");
+        long groceries = categoryId(asha, "🛒 Groceries");
         long txn = createTxn(asha, groceries, "1200.00", "2026-10-05");
         long budget = read(send(put("/api/budgets"), asha,
                 "{\"month\":\"2026-10\",\"categoryId\":" + groceries + ",\"amount\":5000}")).get("id").asLong();
@@ -126,7 +164,7 @@ class ApiIntegrationTest {
 
     @Test
     void databaseRejectsCrossUserCategoryReferences() throws Exception {
-        long ashaGroceries = categoryId(asha, "Groceries");
+        long ashaGroceries = categoryId(asha, "🛒 Groceries");
         Long raviId = jdbc.queryForObject("select id from users where email = ?", Long.class, emailOf("ravi"));
         assertThatThrownBy(() -> jdbc.update(
                 "insert into transactions (user_id, category_id, type, amount, txn_date) values (?, ?, 'EXPENSE', 5, ?)",
@@ -149,8 +187,8 @@ class ApiIntegrationTest {
 
     @Test
     void filtersAndSearch() throws Exception {
-        long groceries = categoryId(asha, "Groceries");
-        long rent = categoryId(asha, "Rent");
+        long groceries = categoryId(asha, "🛒 Groceries");
+        long rent = categoryId(asha, "🏠 Rent & Housing");
         createTxn(asha, groceries, "100.00", "2026-09-10");
         createTxn(asha, rent, "15000.00", "2026-10-01");
         send(post("/api/transactions"), asha,
@@ -167,8 +205,8 @@ class ApiIntegrationTest {
 
     @Test
     void deletingAUsedCategoryArchivesIt() throws Exception {
-        long groceries = categoryId(asha, "Groceries");
-        long health = categoryId(asha, "Health");
+        long groceries = categoryId(asha, "🛒 Groceries");
+        long health = categoryId(asha, "🏥 Healthcare");
         createTxn(asha, groceries, "10.00", "2026-10-01");
         send(delete("/api/categories/" + groceries), asha, null).andExpect(jsonPath("$.archived").value(true));
         send(delete("/api/categories/" + health), asha, null).andExpect(jsonPath("$.deleted").value(true));
@@ -180,8 +218,8 @@ class ApiIntegrationTest {
 
     @Test
     void budgetsTrackSpendingAndReportsAddUp() throws Exception {
-        long groceries = categoryId(asha, "Groceries");
-        long rent = categoryId(asha, "Rent");
+        long groceries = categoryId(asha, "🛒 Groceries");
+        long rent = categoryId(asha, "🏠 Rent & Housing");
         long salary = categoryId(asha, "Salary");
         createTxn(asha, salary, "80000.00", "2026-10-01");
         createTxn(asha, rent, "20000.00", "2026-10-02");
@@ -214,7 +252,7 @@ class ApiIntegrationTest {
                 .andExpect(jsonPath("$.balance").value(54499.50));
 
         JsonNode byCat = read(send(get("/api/reports/by-category?from=2026-10-01&to=2026-10-31"), asha, null));
-        assertThat(byCat.get(0).get("name").asText()).isEqualTo("Rent");
+        assertThat(byCat.get(0).get("name").asText()).isEqualTo("🏠 Rent & Housing");
         assertThat(byCat.get(0).get("percent").asDouble()).isEqualTo(78.4);
 
         JsonNode trend = read(send(get("/api/reports/monthly-trend?months=3"), asha, null));
@@ -226,7 +264,7 @@ class ApiIntegrationTest {
 
     @Test
     void exportsExcelAndPdf() throws Exception {
-        createTxn(asha, categoryId(asha, "Groceries"), "450.00", "2026-10-05");
+        createTxn(asha, categoryId(asha, "🛒 Groceries"), "450.00", "2026-10-05");
         byte[] xlsx = mvc.perform(get("/api/reports/export?from=2026-10-01&to=2026-10-31&format=xlsx")
                         .header("Authorization", "Bearer " + asha))
                 .andExpect(status().isOk())
@@ -246,7 +284,7 @@ class ApiIntegrationTest {
 
     @Test
     void recurringRulePostsMissedOccurrencesOnceAndAdvances() throws Exception {
-        long rent = categoryId(asha, "Rent");
+        long rent = categoryId(asha, "🏠 Rent & Housing");
         JsonNode rule = read(send(post("/api/recurring"), asha,
                 "{\"categoryId\":" + rent + ",\"amount\":15000,\"description\":\"House rent\","
                         + "\"frequency\":\"MONTHLY\",\"startDate\":\"2026-07-31\"}"));
@@ -272,7 +310,7 @@ class ApiIntegrationTest {
 
     @Test
     void recurringRuleStopsAtEndDate() throws Exception {
-        long rent = categoryId(asha, "Rent");
+        long rent = categoryId(asha, "🏠 Rent & Housing");
         send(post("/api/recurring"), asha,
                 "{\"categoryId\":" + rent + ",\"amount\":100,\"description\":\"Gym\",\"frequency\":\"WEEKLY\","
                         + "\"startDate\":\"2026-09-01\",\"endDate\":\"2026-09-20\"}")

@@ -89,12 +89,15 @@ export function CategoryDot({ color }) {
   return <span className="dot" style={{ background: color || '#94a3b8' }} />;
 }
 
-/** Category dropdown grouped by type. */
-export function CategorySelect({ categories, value, onChange, type, allowEmpty, emptyLabel = 'All categories', ...rest }) {
+const ADD_NEW = 'new';
+
+/** Category dropdown grouped by type. With onAddNew it ends with an "Other" choice that calls it. */
+export function CategorySelect({ categories, value, onChange, onAddNew, type, allowEmpty, emptyLabel = 'All categories', ...rest }) {
   const list = type ? categories.filter((c) => c.type === type) : categories;
   const groups = type ? [[type, list]] : [['EXPENSE', list.filter((c) => c.type === 'EXPENSE')], ['INCOME', list.filter((c) => c.type === 'INCOME')]];
+  const change = (v) => (v === ADD_NEW ? onAddNew() : onChange(v ? Number(v) : null));
   return (
-    <select value={value ?? ''} onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)} {...rest}>
+    <select value={value ?? ''} onChange={(e) => change(e.target.value)} {...rest}>
       {allowEmpty && <option value="">{emptyLabel}</option>}
       {!allowEmpty && !value && <option value="">Choose a category</option>}
       {groups.map(([t, cats]) => (
@@ -104,6 +107,7 @@ export function CategorySelect({ categories, value, onChange, type, allowEmpty, 
           ))}
         </optgroup>
       ))}
+      {onAddNew && <option value={ADD_NEW}>➕ Other (add a new category)…</option>}
     </select>
   );
 }

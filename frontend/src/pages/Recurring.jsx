@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { categoryApi, errorInfo, recurringApi } from '../api/client.js';
-import { Alert, CategorySelect, Empty, Field, Modal, PageHeader } from '../components/ui.jsx';
+import CategoryPicker from '../components/CategoryPicker.jsx';
+import { Alert, Empty, Field, Modal, PageHeader } from '../components/ui.jsx';
 import { FREQUENCY_LABEL, dateLabel, money, today } from '../utils/format.js';
 
 function RecurringForm({ categories, initial, onSaved, onCancel }) {
@@ -49,7 +50,7 @@ function RecurringForm({ categories, initial, onSaved, onCancel }) {
         </Field>
       </div>
       <Field label="Category" error={errors.categoryId}>
-        <CategorySelect categories={categories.filter((c) => !c.archived || c.id === initial?.categoryId)}
+        <CategoryPicker categories={categories.filter((c) => !c.archived || c.id === initial?.categoryId)}
                         value={form.categoryId} onChange={set('categoryId')} required />
       </Field>
       <div className="form-row">
