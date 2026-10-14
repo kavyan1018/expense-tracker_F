@@ -1,0 +1,23 @@
+# Starts MySQL for local development: `docker compose up -d`
+# Values come from the .env file in this folder.
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: expense-tracker-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-expense_tracker}
+      MYSQL_USER: ${DB_USERNAME:-expense_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    ports:
+      - "${DB_PORT:-3306}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  mysql-data:
