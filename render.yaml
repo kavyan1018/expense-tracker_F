@@ -1,0 +1,18 @@
+# Render Blueprint: one web service that runs the whole app from the Dockerfile.
+# The database is a hosted MySQL (for example Aiven); its details are entered in Render.
+services:
+  - type: web
+    name: family-expense-tracker
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: DB_URL
+        sync: false   # jdbc:mysql://HOST:PORT/defaultdb?sslMode=REQUIRED
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true

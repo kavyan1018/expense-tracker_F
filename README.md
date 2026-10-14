@@ -77,6 +77,24 @@ cd backend
 
 The tests use an in-memory database, so they don't need Docker. They check login, the privacy rules (one user can't read, change or link to another user's records), budget and report totals, recurring-expense posting, and the Excel and PDF exports.
 
+## Put it online with Render
+
+The `Dockerfile` builds the React app and the Spring Boot backend into one service, so the site and the API share one web address. Render doesn't offer MySQL, so the database runs on a free MySQL from [Aiven](https://aiven.io).
+
+1. **Aiven:** create a free account, then **Create service → MySQL → Free plan**. When it is running, open it and note the **Host**, **Port**, **User** (`avnadmin`) and **Password**.
+2. **Render:** sign in with GitHub, then **New → Blueprint** and pick this repository. Render reads `render.yaml` and asks for:
+
+   | Name | Value |
+   |---|---|
+   | `DB_URL` | `jdbc:mysql://HOST:PORT/defaultdb?sslMode=REQUIRED` (your Aiven host and port) |
+   | `DB_USERNAME` | `avnadmin` |
+   | `DB_PASSWORD` | your Aiven password |
+
+   `JWT_SECRET` is generated for you. Click **Apply** and wait for the first deploy (about 5–10 minutes).
+3. Open the `onrender.com` address Render shows. The tables are created on the first start.
+
+On Render's free plan the service sleeps after 15 minutes without visits; the next visit takes about a minute to wake it. Pushing to `main` deploys again automatically.
+
 ## Using your own MySQL
 
 Create the database and a user, then put the same values in `.env`:
@@ -118,9 +136,10 @@ All settings are read from `.env` or from environment variables:
 | Name | Default | What it does |
 |---|---|---|
 | `DB_HOST`, `DB_PORT`, `DB_NAME` | `localhost`, `3306`, `expense_tracker` | MySQL address |
+| `DB_URL` | built from the three above | Full MySQL address; replaces them when set (used for hosted MySQL) |
 | `DB_USERNAME`, `DB_PASSWORD` | `expense_app`, none | MySQL login |
 | `JWT_SECRET` | none (required) | Signs login tokens. At least 32 characters |
 | `JWT_EXPIRATION_MINUTES` | `1440` | How long a login lasts |
-| `SERVER_PORT` | `8080` | Backend port |
+| `PORT` or `SERVER_PORT` | `8080` | Backend port (Render sets `PORT`) |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost:5173` | Frontend address allowed to call the API |
 | `RECURRING_CRON` | `0 5 0 * * *` | When recurring items are posted (default 00:05 daily; they are also posted at startup) |

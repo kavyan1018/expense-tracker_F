@@ -3,6 +3,7 @@
 
 # backend
 backend/target/
+backend/src/main/resources/static/
 *.log
 
 # frontend

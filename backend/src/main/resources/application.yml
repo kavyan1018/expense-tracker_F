@@ -8,7 +8,8 @@ spring:
   application:
     name: family-expense-tracker
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:expense_tracker}?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    # DB_URL replaces the whole address, e.g. for a hosted MySQL that needs SSL.
+    url: ${DB_URL:jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:expense_tracker}?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${DB_USERNAME:expense_app}
     password: ${DB_PASSWORD}
   jpa:
@@ -24,7 +25,7 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${PORT:${SERVER_PORT:8080}} # hosts such as Render set PORT
   error:
     include-message: never
 
