@@ -3,7 +3,7 @@
 A web app where each family member keeps track of their own income, expenses, budgets and recurring bills. Every account is private: nobody can see or change another member's records.
 
 - **Frontend:** React (Vite), React Router, Recharts
-- **Backend:** Java 17+, Spring Boot 4, Spring Security with JWT login
+- **Backend:** Java 25 LTS, Spring Boot 4, Spring Security with JWT login
 - **Database:** MySQL 8, with tables created automatically by Flyway
 - **Currency:** Indian Rupee (₹)
 
@@ -26,7 +26,7 @@ A web app where each family member keeps track of their own income, expenses, bu
 
 | Tool | Version | Check with |
 |---|---|---|
-| Java (JDK) | 17 or newer | `java -version` |
+| Java (JDK) | 25 LTS | `java -version` |
 | Node.js | 20 or newer | `node -v` |
 | Docker Desktop | any recent version | `docker -v` |
 

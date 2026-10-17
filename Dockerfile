@@ -10,7 +10,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # 2. Build the Spring Boot jar with the React app inside it
-FROM eclipse-temurin:21-jdk AS backend
+FROM eclipse-temurin:25-jdk AS backend
 WORKDIR /app/backend
 COPY backend/.mvn .mvn
 COPY backend/mvnw backend/pom.xml ./
@@ -20,7 +20,7 @@ COPY --from=frontend /app/frontend/dist src/main/resources/static
 RUN ./mvnw -q -B -DskipTests package && cp target/*.jar /app/app.jar
 
 # 3. Run it
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 WORKDIR /app
 COPY --from=backend /app/app.jar app.jar
 # "Today" for budgets and recurring bills follows Indian time
